@@ -1,29 +1,60 @@
-# MySQL HTTP
+# MySQL Base24
 
-A small MySQL UDF library for making HTTP requests written in Golang.
+A small MySQL UDF library for making encoding/decoding base24 strings written in Golang.
 
 ## Usage
 
-### `http_touch`
+The base24 implementation used for this is the same that Microsoft used for their product keys, which uses the following characters, in this order:
+```
+2 3 4 6 7 8 9 b c d f g h j k m p q r t v w x y
+```
+You can read more about it [here](https://news.ycombinator.com/item?id=22429809).
 
-Makes an HTTP Get request to the given URL and returns nothing.
+---
+
+### `to_base24`
+
+Converts the string argument to base24 encoded form and returns the result as a binary string. If the argument is not a string, it is converted to a string before conversion takes place. The result is `NULL` if the argument is `NULL`.
 
 ```sql
-`http_touch` ( `URL` )
+`to_base24` ( `string` )
 ```
 
- - `` `URL` ``
-   - The URL to request.
+ - `` `string` ``
+   - The string to be encoded.
 
 ## Examples
 
-We can quickly build a test table of random numbers by running these queries
+```sql
+select`to_base24`('abc');    -- 't8p76'
+select`to_base24`(42);       -- 'y7r'
+select`to_base24`('42');     -- 'y7r'
+select`to_base24`(0x00abcd); -- '267cj'
+select`to_base24`(null);     -- NULL
+```
+---
+
+### `from_base24`
+
+Takes a string encoded with the base24 encoded rules used by `to_base24` and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base24 string.
 
 ```sql
--- hit our test endpoint
-select`http_touch`('http://localhost:48642/');
+`from_base24` ( `string` )
 ```
 
+ - `` `string` ``
+   - The string to be decoded.
+
+## Examples
+
+```sql
+select`from_base24`('t8p76');       -- 'abc'
+select`from_base24`('y7r');         -- '42'
+select`from_base24`('y7r');         -- '42'
+select hex(`from_base24`('267cj')); -- '00ABCD'
+select`from_base24`(null);          -- NULL
+```
+---
 
 ## Dependencies
 
@@ -48,14 +79,15 @@ then replace `/usr/lib/mysql/plugin` below with your MySQL plugin directory.
 
 ```shell
 cd ~ # or wherever you store your git projects
-git clone https://github.com/StirlingMarketingGroup/mysql-http.git
-cd mysql-http
-go build -buildmode=c-shared -o mysql_http.so
-sudo cp mysql_http.so /usr/lib/mysql/plugin/mysql_http.so # replace plugin dir here if needed
+git clone https://github.com/StirlingMarketingGroup/mysql-base24.git
+cd mysql-base24
+go build -buildmode=c-shared -o base24.so
+sudo cp base24.so /usr/lib/mysql/plugin/ # replace plugin dir here if needed
 ```
 
-Enable the function in MySQL by running this MySQL query
+Enable the functions in MySQL by running this MySQL query
 
 ```sql
-create function`http_touch`returns int soname'mysql_http.so';
-```# mysql-base24
+create function`to_base24`returns string soname'base24.so';
+create function`from_base24`returns string soname'base24.so';
+```
