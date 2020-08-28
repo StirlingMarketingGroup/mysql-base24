@@ -6,6 +6,7 @@ package main
 // #cgo CFLAGS: -O3 -I/usr/include/mysql -fno-omit-frame-pointer
 import "C"
 import (
+	"strings"
 	"unsafe"
 
 	"github.com/eknkc/basex"
@@ -94,7 +95,7 @@ func from_base24(initid *C.UDF_INIT, args *C.UDF_ARGS, result *C.char, length *u
 		a[i] = C.GoStringN(argsArg, C.int(argsLengths[i]))
 	}
 
-	decoded, err := base24.Decode(a[0])
+	decoded, err := base24.Decode(strings.ToLower(a[0]))
 	if err != nil {
 		*length = 0
 		*isNull = 1

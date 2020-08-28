@@ -8,7 +8,7 @@ The base24 implementation used for this is the same that Microsoft used for thei
 ```
 2 3 4 6 7 8 9 b c d f g h j k m p q r t v w x y
 ```
-You can read more about it [here](https://news.ycombinator.com/item?id=22429809).
+The use of all lowercase letters means this is case insensitive. You can read more about it [here](https://news.ycombinator.com/item?id=22429809).
 
 ---
 
@@ -49,7 +49,7 @@ Takes a string encoded with the base24 encoded rules used by `to_base24` and ret
 
 ```sql
 select`from_base24`('t8p76');       -- 'abc'
-select`from_base24`('y7r');         -- '42'
+select`from_base24`('T8P76');       -- 'abc'
 select`from_base24`('y7r');         -- '42'
 select hex(`from_base24`('267cj')); -- '00ABCD'
 select`from_base24`(null);          -- NULL
